@@ -1,0 +1,18 @@
+public class revret {
+
+    static int reverse(int n) {
+        int rev = 0;
+        while (n != 0) {
+            int rem = n % 10;
+            rev = rev * 10 + rem;
+            n /= 10;
+        }
+        return rev;
+    }
+
+    public static void main(String[] args) {
+        int n = 12345;
+        int res = reverse(n);
+        System.out.println(res);
+    }
+}

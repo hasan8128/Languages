@@ -1,0 +1,1126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Ladder: Attendance Tracker & Bunk Planner</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <style>
+        :root {
+            /* Ultra-Premium Light Mode - Fintech/SaaS Aesthetic */
+            --bg-color: #F7F7F9;
+            --surface-color: rgba(255, 255, 255, 0.75);
+            --text-primary: #0F0F13;
+            --text-secondary: #8A8A93;
+            --border-color: rgba(0, 0, 0, 0.06);
+            --accent-color: #0F0F13;
+            --accent-text: #FFFFFF;
+            
+            /* Status Indicators */
+            --status-safe: #0F0F13;
+            --status-warning: #8A8A93;
+            --status-critical: #0F0F13;
+            
+            --glass-blur: blur(24px);
+            --card-shadow: 0 8px 32px rgba(0, 0, 0, 0.04), 0 2px 8px rgba(0, 0, 0, 0.02);
+            --btn-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+        }
+
+        body.dark {
+            /* Ultra-Premium OLED Dark Mode */
+            --bg-color: #000000;
+            --surface-color: rgba(20, 20, 22, 0.6);
+            --text-primary: #FFFFFF;
+            --text-secondary: #93939A;
+            --border-color: rgba(255, 255, 255, 0.08);
+            --accent-color: #FFFFFF;
+            --accent-text: #000000;
+            
+            /* Status Indicators */
+            --status-safe: #FFFFFF;
+            --status-warning: #93939A;
+            --status-critical: #FFFFFF;
+            
+            --card-shadow: 0 8px 32px rgba(0, 0, 0, 0.4), 0 2px 8px rgba(0, 0, 0, 0.2), inset 0 1px 0 rgba(255,255,255,0.05);
+            --btn-shadow: 0 4px 12px rgba(255, 255, 255, 0.1);
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-primary);
+            font-family: 'Inter', sans-serif;
+            transition: background-color 0.5s cubic-bezier(0.22, 1, 0.36, 1), color 0.5s ease;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            position: relative;
+        }
+
+        /* Decorative Ambient Background Mesh */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: radial-gradient(circle at 15% 50%, rgba(0,0,0,0.02), transparent 25%),
+                        radial-gradient(circle at 85% 30%, rgba(0,0,0,0.02), transparent 25%);
+            z-index: -1;
+            pointer-events: none;
+        }
+        body.dark::before {
+            background: radial-gradient(circle at 15% 50%, rgba(255,255,255,0.03), transparent 30%),
+                        radial-gradient(circle at 85% 30%, rgba(255,255,255,0.02), transparent 30%);
+        }
+
+        .font-serif { 
+            font-family: 'Playfair Display', serif; 
+            letter-spacing: -0.02em;
+        }
+
+        h1, h2, h3, h4 {
+            letter-spacing: -0.03em;
+        }
+
+        /* Structural utility classes mapped to CSS variables */
+        .bg-surface { 
+            background-color: var(--surface-color); 
+            backdrop-filter: var(--glass-blur);
+            -webkit-backdrop-filter: var(--glass-blur);
+        }
+        .text-muted { color: var(--text-secondary); }
+        .border-line { border-color: var(--border-color); }
+        
+        /* Ultra-Modern Cards */
+        .card {
+            background-color: var(--surface-color);
+            backdrop-filter: var(--glass-blur);
+            -webkit-backdrop-filter: var(--glass-blur);
+            border: 1px solid var(--border-color);
+            border-radius: 24px;
+            padding: 1.75rem;
+            box-shadow: var(--card-shadow);
+            transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.4s ease;
+        }
+        .card:hover {
+            transform: translateY(-2px);
+        }
+
+        /* Silky Smooth Buttons */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 14px;
+            padding: 0.6rem 1.25rem;
+            font-weight: 600;
+            font-size: 0.875rem;
+            letter-spacing: -0.01em;
+            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+        .btn:active { transform: scale(0.96); }
+
+        .btn-outline {
+            border: 1.5px solid var(--border-color);
+            background-color: transparent;
+            color: var(--text-primary);
+        }
+        .btn-outline:hover {
+            border-color: var(--accent-color);
+            background-color: var(--surface-color);
+        }
+        .btn-outline.active {
+            background-color: var(--text-primary);
+            color: var(--bg-color);
+            border-color: var(--text-primary);
+        }
+
+        .btn-primary {
+            background-color: var(--accent-color);
+            color: var(--accent-text);
+            box-shadow: var(--btn-shadow);
+        }
+        .btn-primary:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.15);
+        }
+        body.dark .btn-primary:hover {
+            box-shadow: 0 6px 20px rgba(255,255,255,0.15);
+        }
+
+        .btn-ghost {
+            color: var(--text-secondary);
+            border-radius: 14px;
+            padding: 0.5rem;
+            transition: all 0.2s ease;
+        }
+        .btn-ghost:hover {
+            background-color: var(--border-color);
+            color: var(--text-primary);
+        }
+
+        /* Inputs */
+        .input-field {
+            width: 100%;
+            background-color: transparent;
+            border: 1.5px solid var(--border-color);
+            color: var(--text-primary);
+            border-radius: 14px;
+            padding: 0.875rem 1rem;
+            font-weight: 500;
+            outline: none;
+            transition: all 0.3s ease;
+        }
+        .input-field:focus { 
+            border-color: var(--accent-color); 
+            background-color: var(--surface-color);
+            box-shadow: 0 0 0 4px rgba(0,0,0,0.03);
+        }
+        body.dark .input-field:focus {
+            box-shadow: 0 0 0 4px rgba(255,255,255,0.03);
+        }
+        select.input-field option { background-color: var(--bg-color); color: var(--text-primary); }
+
+        /* Custom Range Slider */
+        input[type=range] { -webkit-appearance: none; background: transparent; width: 100%; }
+        input[type=range]:focus { outline: none; }
+        input[type=range]::-webkit-slider-runnable-track {
+            width: 100%; height: 8px; background: var(--border-color); border-radius: 8px;
+        }
+        input[type=range]::-webkit-slider-thumb {
+            height: 28px; width: 28px; background: var(--accent-color);
+            cursor: pointer; -webkit-appearance: none; margin-top: -10px;
+            border-radius: 50%; box-shadow: var(--btn-shadow);
+            border: 4px solid var(--bg-color);
+            transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        input[type=range]::-webkit-slider-thumb:hover { transform: scale(1.1); }
+
+        /* Expandable Accordion Animation */
+        .expandable {
+            max-height: 0; overflow: hidden; opacity: 0;
+            transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .expandable.open {
+            max-height: 600px; opacity: 1; margin-top: 1.5rem;
+            padding-top: 1.5rem; border-top: 1px solid var(--border-color);
+        }
+
+        /* Modals */
+        .modal-overlay {
+            background-color: rgba(0,0,0,0.2);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            transition: opacity 0.3s ease;
+        }
+        body.dark .modal-overlay {
+            background-color: rgba(0,0,0,0.6);
+        }
+        .modal-content {
+            background-color: var(--bg-color);
+            border: 1px solid var(--border-color);
+            border-radius: 32px;
+            box-shadow: 0 24px 48px -12px rgba(0,0,0,0.2);
+        }
+
+        /* Circular Progress SVG */
+        .progress-ring__circle {
+            transition: stroke-dashoffset 1.2s cubic-bezier(0.22, 1, 0.36, 1);
+            transform: rotate(-90deg);
+            transform-origin: 50% 50%;
+            filter: drop-shadow(0 4px 8px rgba(0,0,0,0.1));
+        }
+        body.dark .progress-ring__circle {
+            filter: drop-shadow(0 4px 8px rgba(255,255,255,0.15));
+        }
+
+        /* Toast Notifications */
+        #toast {
+            position: fixed; bottom: 5rem; left: 50%;
+            transform: translateX(-50%) translateY(100px); opacity: 0;
+            background-color: var(--accent-color); color: var(--accent-text);
+            padding: 0.75rem 1.5rem; border-radius: 16px;
+            font-weight: 600; font-size: 0.875rem;
+            transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+            z-index: 100; pointer-events: none;
+            box-shadow: 0 12px 24px rgba(0,0,0,0.15);
+        }
+        #toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
+
+        /* Utilities */
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        .pb-safe { padding-bottom: calc(env(safe-area-inset-bottom) + 6rem); }
+        
+        /* Nav Blur overriding for cleaner glass */
+        .nav-glass {
+            background: var(--surface-color);
+            backdrop-filter: var(--glass-blur);
+            -webkit-backdrop-filter: var(--glass-blur);
+        }
+    </style>
+</head>
+<body class="min-h-screen pb-safe">
+
+    <header class="border-b border-line sticky top-0 z-40 nav-glass">
+        <div class="max-w-4xl mx-auto px-6 py-5 flex items-center justify-between">
+            <div>
+                <h1 class="font-serif font-bold text-2xl tracking-tight">Ladder</h1>
+                <p class="text-[10px] uppercase tracking-widest text-muted mt-1">Attendance Protocol</p>
+            </div>
+            <div class="flex items-center space-x-2">
+                <button onclick="app.openModal('baselineModal')" class="btn-ghost text-xs uppercase tracking-wider hidden sm:block font-medium">Baselines</button>
+                <button onclick="app.toggleDarkMode()" class="btn-ghost w-10 h-10 flex items-center justify-center" id="darkModeBtn">
+                    <i class="fa-solid fa-moon"></i>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-4xl mx-auto px-6 py-8">
+        
+        <!-- ================= HOME TAB ================= -->
+        <div id="tab-home" class="tab-content block space-y-8">
+            
+            <!-- Dashboard Widget: Circular Gauge + Class Margin -->
+            <div class="card bg-surface flex flex-col md:flex-row items-center gap-8 border-line">
+                <!-- Rich UX Circular Gauge restored -->
+                <div class="relative w-40 h-40 flex-shrink-0">
+                    <svg class="w-full h-full" viewBox="0 0 120 120">
+                        <circle cx="60" cy="60" r="54" fill="none" stroke="var(--border-color)" stroke-width="8"></circle>
+                        <circle id="overallProgressRing" class="progress-ring__circle" cx="60" cy="60" r="54" fill="none" stroke="var(--accent-color)" stroke-width="8" stroke-dasharray="339.292" stroke-dashoffset="339.292" stroke-linecap="round"></circle>
+                    </svg>
+                    <div class="absolute inset-0 flex flex-col items-center justify-center">
+                        <span id="overallPercentage" class="font-serif text-3xl font-bold">0%</span>
+                        <span class="text-[9px] uppercase tracking-widest text-muted mt-1">Overall</span>
+                    </div>
+                </div>
+
+                <div class="flex-1 w-full flex flex-col sm:flex-row justify-around gap-6 text-center md:text-left">
+                    <div>
+                        <p class="text-xs uppercase tracking-widest text-muted font-medium mb-1">Total Classes</p>
+                        <h3 id="overallHoursText" class="font-serif text-2xl font-bold">0 / 0</h3>
+                    </div>
+                    <!-- Requested terminology: Class Margin -->
+                    <div>
+                        <p class="text-xs uppercase tracking-widest text-muted font-medium mb-1">Class Margin</p>
+                        <h3 class="font-serif text-4xl font-bold flex items-baseline justify-center md:justify-start">
+                            <span id="safeClassesCount">0</span>
+                        </h3>
+                        <p class="text-[10px] text-muted mt-1 uppercase tracking-wider">Safe Bunks Available</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Today's Schedule -->
+            <div>
+                <div class="flex items-center justify-between mb-6">
+                    <h3 class="font-serif text-2xl font-bold">Today's Protocol</h3>
+                    <p id="currentDayText" class="text-sm text-muted uppercase tracking-widest">Monday</p>
+                </div>
+                
+                <div id="todayScheduleContainer" class="space-y-3">
+                    <!-- Dynamic classes populate here -->
+                </div>
+            </div>
+        </div>
+
+        <!-- ================= SCHEDULE TAB ================= -->
+        <div id="tab-schedule" class="tab-content hidden space-y-8">
+            
+            <!-- Sub-Navigation for Schedule Tab -->
+            <div class="flex space-x-2 border-b border-line pb-4">
+                <button id="nav-sub-timetable" onclick="app.switchSubTab('timetable')" class="text-sm font-medium border-accent-color border-b-2 pb-1 transition-all" style="border-color: var(--accent-color); color: var(--text-primary);">Timetable</button>
+                <button id="nav-sub-exceptions" onclick="app.switchSubTab('exceptions')" class="text-sm font-medium text-muted border-transparent border-b-2 pb-1 transition-all">Exceptions</button>
+            </div>
+
+            <!-- Timetable Sub-View -->
+            <div id="view-timetable" class="block space-y-8">
+                <div class="flex items-center justify-between">
+                    <h3 class="font-serif text-2xl font-bold">Subjects</h3>
+                    <button onclick="app.openModal('subjectModal')" class="btn btn-primary text-xs">
+                        <i class="fa-solid fa-plus mr-2"></i>Add Subject
+                    </button>
+                </div>
+                
+                <div id="subjectListContainer" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <!-- Subjects render here -->
+                </div>
+
+                <div class="mt-8">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="font-serif text-2xl font-bold">Weekly Grid</h3>
+                    </div>
+                    <div class="card overflow-x-auto p-0 border-line">
+                        <table class="w-full text-left text-sm whitespace-nowrap">
+                            <thead class="bg-surface border-b border-line text-muted uppercase tracking-wider text-xs">
+                                <tr>
+                                    <th class="p-4 font-medium w-32">Day</th>
+                                    <th class="p-4 font-medium">Classes (In Order)</th>
+                                </tr>
+                            </thead>
+                            <tbody id="timetableGrid">
+                                <!-- Grid populates here -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Exceptions Sub-View -->
+            <div id="view-exceptions" class="hidden space-y-6">
+                <div class="flex items-start sm:items-center justify-between flex-col sm:flex-row gap-4">
+                    <div>
+                        <h3 class="font-serif text-2xl font-bold">Manage Exceptions</h3>
+                        <p class="text-xs text-muted mt-2 max-w-lg leading-relaxed">
+                            <strong>Why use exceptions?</strong> Logging a Campus Holiday or Official Leave here removes those dates from the "Total Classes Held" calculation, ensuring your percentage isn't unfairly dragged down by schedules that didn't actually happen.
+                        </p>
+                    </div>
+                    <button onclick="app.openModal('exceptionModal')" class="btn btn-primary text-xs whitespace-nowrap">
+                        <i class="fa-solid fa-calendar-plus mr-2"></i>Log Exception
+                    </button>
+                </div>
+                
+                <div id="exceptionsListContainer" class="space-y-3 mt-4">
+                    <!-- Exceptions render here -->
+                </div>
+            </div>
+        </div>
+
+        <!-- ================= GRAPH TAB ================= -->
+        <div id="tab-graph" class="tab-content hidden space-y-8">
+            <h3 class="font-serif text-2xl font-bold">Analytics & Simulation</h3>
+            
+            <div class="card border-line h-[300px] p-4">
+                <canvas id="performanceChart"></canvas>
+            </div>
+
+            <div class="mt-8">
+                <h4 class="font-serif text-xl font-bold mb-4">Subject Breakdown & Simulator</h4>
+                <div id="graphCardsContainer" class="space-y-4">
+                    <!-- Subject cards with interactive simulators populate here -->
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- Bottom Navigation -->
+    <nav class="fixed bottom-0 w-full border-t border-line nav-glass pb-safe">
+        <div class="flex justify-around items-center h-20 max-w-md mx-auto">
+            <button id="nav-btn-home" onclick="app.switchTab('home')" class="flex flex-col items-center justify-center w-full h-full text-text-primary">
+                <i class="fa-solid fa-house text-lg mb-1"></i>
+                <span class="text-[10px] font-medium tracking-widest uppercase">Home</span>
+            </button>
+            <button id="nav-btn-schedule" onclick="app.switchTab('schedule')" class="flex flex-col items-center justify-center w-full h-full text-muted transition-colors">
+                <i class="fa-solid fa-calendar-days text-lg mb-1"></i>
+                <span class="text-[10px] font-medium tracking-widest uppercase">Plan</span>
+            </button>
+            <button id="nav-btn-graph" onclick="app.switchTab('graph')" class="flex flex-col items-center justify-center w-full h-full text-muted transition-colors">
+                <i class="fa-solid fa-chart-simple text-lg mb-1"></i>
+                <span class="text-[10px] font-medium tracking-widest uppercase">Stats</span>
+            </button>
+        </div>
+    </nav>
+
+    <!-- UI TOAST for graceful error handling (Replaces alert()) -->
+    <div id="toast">Message goes here</div>
+
+    <!-- Modals (Rebuilt with strict UX requirements) -->
+    
+    <!-- Add Subject Modal -->
+    <div id="subjectModal" class="fixed inset-0 modal-overlay hidden z-50 flex items-center justify-center p-4">
+        <div class="modal-content w-full max-w-md p-6 relative">
+            <button onclick="app.closeModal('subjectModal')" class="absolute top-4 right-4 text-muted hover:text-text-primary"><i class="fa-solid fa-xmark text-xl"></i></button>
+            <h2 class="font-serif text-2xl font-bold mb-6">Subject Details</h2>
+            
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-xs uppercase tracking-widest text-muted font-medium mb-2">Subject Name</label>
+                    <input type="text" id="subjName" class="input-field" placeholder="e.g. CS101: Data Structures">
+                </div>
+                <div>
+                    <label class="block text-xs uppercase tracking-widest text-muted font-medium mb-2">Target % Override</label>
+                    <input type="number" id="subjTarget" class="input-field" placeholder="Leave blank for global 75%">
+                </div>
+                <button onclick="app.saveSubject()" class="btn btn-primary w-full mt-4">Save Subject</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Slot Modal (Replaces prompt()) -->
+    <div id="slotModal" class="fixed inset-0 modal-overlay hidden z-50 flex items-center justify-center p-4">
+        <div class="modal-content w-full max-w-md p-6 relative">
+            <button onclick="app.closeModal('slotModal')" class="absolute top-4 right-4 text-muted hover:text-text-primary"><i class="fa-solid fa-xmark text-xl"></i></button>
+            <h2 class="font-serif text-2xl font-bold mb-2">Add Class Slot</h2>
+            <p id="slotModalDay" class="text-sm text-muted mb-6 uppercase tracking-widest"></p>
+            
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-xs uppercase tracking-widest text-muted font-medium mb-2">Select Subject</label>
+                    <select id="slotSubject" class="input-field"></select>
+                </div>
+                <div>
+                    <label class="block text-xs uppercase tracking-widest text-muted font-medium mb-2">Class Weight (Duration)</label>
+                    <select id="slotWeight" class="input-field">
+                        <option value="1">Standard (1 Unit)</option>
+                        <option value="2">Double / Lab (2 Units)</option>
+                        <option value="3">Extended (3 Units)</option>
+                    </select>
+                </div>
+                <button onclick="app.saveSlot()" class="btn btn-primary w-full mt-4">Add to Timetable</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Exceptions Modal -->
+    <div id="exceptionModal" class="fixed inset-0 modal-overlay hidden z-50 flex items-center justify-center p-4">
+        <div class="modal-content w-full max-w-md p-6 relative">
+            <button onclick="app.closeModal('exceptionModal')" class="absolute top-4 right-4 text-muted hover:text-text-primary"><i class="fa-solid fa-xmark text-xl"></i></button>
+            <h2 class="font-serif text-2xl font-bold mb-6">Log Exception</h2>
+            
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-xs uppercase tracking-widest text-muted font-medium mb-2">Date</label>
+                    <input type="date" id="exceptionDate" class="input-field">
+                </div>
+                <div>
+                    <label class="block text-xs uppercase tracking-widest text-muted font-medium mb-2">Type</label>
+                    <select id="exceptionType" class="input-field">
+                        <option value="holiday">Campus Holiday (Cancels all classes)</option>
+                        <option value="medical">Medical/Official Leave (Neutralizes)</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-xs uppercase tracking-widest text-muted font-medium mb-2">Note (Optional)</label>
+                    <input type="text" id="exceptionNote" class="input-field" placeholder="e.g. Diwali Break">
+                </div>
+                <button onclick="app.saveException()" class="btn btn-primary w-full mt-4">Save Exception</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Baselines Modal -->
+    <div id="baselineModal" class="fixed inset-0 modal-overlay hidden z-50 flex items-center justify-center p-4">
+        <div class="modal-content w-full max-w-md p-6 relative max-h-[80vh] overflow-y-auto no-scrollbar">
+            <button onclick="app.closeModal('baselineModal')" class="absolute top-4 right-4 text-muted hover:text-text-primary"><i class="fa-solid fa-xmark text-xl"></i></button>
+            <h2 class="font-serif text-2xl font-bold mb-2">Initial Baselines</h2>
+            <p class="text-sm text-muted mb-6">Set past attendance if joining mid-semester.</p>
+            
+            <div id="baselineList" class="space-y-4">
+                <!-- Inputs generated via JS -->
+            </div>
+            <button onclick="app.saveBaselines()" class="btn btn-primary w-full mt-6">Update Baselines</button>
+        </div>
+    </div>
+
+    <script>
+        class LadderApp {
+            constructor() {
+                this.state = {
+                    globalTarget: 75,
+                    activeTab: 'home',
+                    activeSubTab: 'timetable',
+                    subjects: [],      // {id, name, target}
+                    timetable: [],     // {id, subjectId, day, weight}
+                    logs: {},          // { date: { slotId: 'attended'|'bunked'|'cancelled' } }
+                    exceptions: {},    // { date: { type, note } }
+                    baselines: {},     // { subjectId: { attended, held } }
+                    simulatorValues: {},// { subjectId: value }
+                    isDarkMode: false
+                };
+                this.chartInstance = null;
+                this.pendingSlotDay = null; // Used for Add Slot modal
+            }
+
+            init() {
+                this.loadData();
+                this.applyTheme();
+                document.getElementById('exceptionDate').valueAsDate = new Date();
+                this.renderAll();
+            }
+
+            showToast(message) {
+                const toast = document.getElementById('toast');
+                toast.textContent = message;
+                toast.classList.add('show');
+                setTimeout(() => toast.classList.remove('show'), 3000);
+            }
+
+            loadData() {
+                try {
+                    const saved = localStorage.getItem('ladderData_v3');
+                    if (saved) {
+                        const parsed = JSON.parse(saved);
+                        this.state = { ...this.state, ...parsed };
+                    }
+                    this.state.simulatorValues = {}; // Reset simulator on load
+                } catch (e) {
+                    console.error("Failed to load data", e);
+                }
+            }
+
+            saveData() {
+                localStorage.setItem('ladderData_v3', JSON.stringify(this.state));
+                this.renderAll();
+            }
+
+            toggleDarkMode() {
+                this.state.isDarkMode = !this.state.isDarkMode;
+                this.saveData();
+                this.applyTheme();
+                if(this.state.activeTab === 'graph') this.renderGraph();
+            }
+
+            applyTheme() {
+                const btn = document.getElementById('darkModeBtn');
+                if (this.state.isDarkMode) {
+                    document.body.classList.add('dark');
+                    if(btn) btn.innerHTML = '<i class="fa-solid fa-sun text-lg"></i>';
+                } else {
+                    document.body.classList.remove('dark');
+                    if(btn) btn.innerHTML = '<i class="fa-solid fa-moon text-lg"></i>';
+                }
+            }
+
+            /* Tab Navigation Logic */
+            switchTab(tabId) {
+                this.state.activeTab = tabId;
+                ['home', 'schedule', 'graph'].forEach(id => {
+                    const el = document.getElementById(`tab-${id}`);
+                    const btn = document.getElementById(`nav-btn-${id}`);
+                    if(el && btn) {
+                        if(id === tabId) {
+                            el.classList.remove('hidden');
+                            btn.classList.replace('text-muted', 'text-text-primary');
+                        } else {
+                            el.classList.add('hidden');
+                            btn.classList.replace('text-text-primary', 'text-muted');
+                        }
+                    }
+                });
+                if(tabId === 'graph') setTimeout(() => this.renderGraph(), 50);
+                this.saveData();
+            }
+
+            switchSubTab(subId) {
+                this.state.activeSubTab = subId;
+                const ttView = document.getElementById('view-timetable');
+                const exView = document.getElementById('view-exceptions');
+                const ttBtn = document.getElementById('nav-sub-timetable');
+                const exBtn = document.getElementById('nav-sub-exceptions');
+                
+                // Classic active tab styling with border variables
+                if (subId === 'timetable') {
+                    ttView.classList.remove('hidden'); exView.classList.add('hidden');
+                    ttBtn.style.borderColor = 'var(--accent-color)'; ttBtn.style.color = 'var(--text-primary)';
+                    exBtn.style.borderColor = 'transparent'; exBtn.style.color = 'var(--text-secondary)';
+                } else {
+                    exView.classList.remove('hidden'); ttView.classList.add('hidden');
+                    exBtn.style.borderColor = 'var(--accent-color)'; exBtn.style.color = 'var(--text-primary)';
+                    ttBtn.style.borderColor = 'transparent'; ttBtn.style.color = 'var(--text-secondary)';
+                }
+            }
+
+            /* Modal and Interaction Logic */
+            openModal(id) { 
+                const el = document.getElementById(id);
+                if(el) el.classList.remove('hidden'); 
+                if(id === 'baselineModal') this.renderBaselinesForm();
+            }
+            closeModal(id) { 
+                const el = document.getElementById(id);
+                if(el) el.classList.add('hidden'); 
+            }
+            toggleExpand(id) {
+                const el = document.getElementById(id);
+                const icon = document.getElementById(`icon_${id}`);
+                if(el) el.classList.toggle('open');
+                if(icon) icon.style.transform = el.classList.contains('open') ? 'rotate(180deg)' : 'rotate(0deg)';
+            }
+
+            getStats(subjectId, simulatorDelta = 0) {
+                const subject = this.state.subjects.find(s => s.id === subjectId);
+                if(!subject) return { attended:0, held:0, percentage:100, classMargin:0, status:'SAFE', target:this.state.globalTarget };
+                
+                const target = (subject.target || this.state.globalTarget) / 100;
+                const base = this.state.baselines[subjectId] || { attended: 0, held: 0 };
+                let attended = base.attended;
+                let held = base.held;
+
+                for (const date in this.state.logs) {
+                    const isException = this.state.exceptions[date];
+                    if (isException && isException.type === 'holiday') continue;
+
+                    const dayLogs = this.state.logs[date];
+                    for (const slotId in dayLogs) {
+                        const slot = this.state.timetable.find(t => t.id === slotId);
+                        if (slot && slot.subjectId === subjectId) {
+                            const status = dayLogs[slotId];
+                            if (status === 'attended') {
+                                attended += slot.weight;
+                                held += slot.weight;
+                            } else if (status === 'bunked') {
+                                held += slot.weight;
+                            }
+                        }
+                    }
+                }
+
+                // Interactive Simulator Logic
+                if (simulatorDelta > 0) {
+                    attended += simulatorDelta;
+                    held += simulatorDelta;
+                } else if (simulatorDelta < 0) {
+                    held += Math.abs(simulatorDelta);
+                }
+
+                const percentage = held === 0 ? 100 : Math.round((attended / held) * 1000) / 10;
+                
+                let classMargin = 0;
+                let status = 'SAFE';
+                
+                if (percentage >= (target * 100)) {
+                    // Safe Bunks Formula
+                    classMargin = Math.floor((attended - (target * held)) / target);
+                    if (percentage < (target * 100) + 5) status = 'WARNING';
+                } else {
+                    // Recovery Formula
+                    classMargin = Math.ceil(((target * held) - attended) / (1 - target)) * -1;
+                    status = 'CRITICAL';
+                }
+
+                return { attended, held, percentage, classMargin, status, target: target * 100 };
+            }
+
+            renderAll() {
+                this.renderHome();
+                this.renderSchedule();
+                if (this.state.activeTab === 'graph') this.renderGraph();
+            }
+
+            renderHome() {
+                let grandAttended = 0;
+                let grandHeld = 0;
+                let totalSafeClasses = 0;
+                
+                this.state.subjects.forEach(sub => {
+                    const st = this.getStats(sub.id);
+                    grandAttended += st.attended;
+                    grandHeld += st.held;
+                    if (st.classMargin > 0) totalSafeClasses += st.classMargin;
+                });
+
+                const ovrPct = grandHeld === 0 ? 100 : Math.round((grandAttended / grandHeld) * 1000) / 10;
+
+                const pctEl = document.getElementById('overallPercentage');
+                const hrsEl = document.getElementById('overallHoursText');
+                const sfcEl = document.getElementById('safeClassesCount');
+                const ringEl = document.getElementById('overallProgressRing');
+                
+                if(pctEl) pctEl.textContent = `${ovrPct}%`;
+                if(hrsEl) hrsEl.textContent = `${grandAttended} / ${grandHeld}`;
+                if(sfcEl) sfcEl.textContent = totalSafeClasses;
+
+                // Animate SVG Ring
+                if (ringEl) {
+                    const radius = ringEl.r.baseVal.value;
+                    const circumference = radius * 2 * Math.PI;
+                    const offset = circumference - (ovrPct / 100) * circumference;
+                    ringEl.style.strokeDashoffset = offset < 0 ? 0 : offset;
+                }
+
+                this.renderTodaySchedule();
+            }
+
+            renderTodaySchedule() {
+                const container = document.getElementById('todayScheduleContainer');
+                if (!container) return;
+                
+                const todayStr = new Date().toLocaleDateString('en-CA');
+                const dayName = new Date().toLocaleDateString('en-US', { weekday: 'long' });
+                
+                const currentDayEl = document.getElementById('currentDayText');
+                if(currentDayEl) currentDayEl.textContent = dayName;
+
+                const exception = this.state.exceptions[todayStr];
+                if (exception) {
+                    container.innerHTML = `
+                        <div class="card bg-surface flex items-center p-6 border-line">
+                            <i class="fa-solid fa-umbrella-beach text-2xl text-muted mr-4"></i>
+                            <div>
+                                <p class="font-medium text-lg">Exception Active</p>
+                                <p class="text-sm text-muted">${exception.note || exception.type}</p>
+                            </div>
+                        </div>`;
+                    return;
+                }
+
+                const todaySlots = this.state.timetable.filter(t => t.day === dayName);
+                if (todaySlots.length === 0) {
+                    container.innerHTML = `
+                        <div class="card bg-surface flex flex-col items-center justify-center p-8 text-center border-line">
+                            <i class="fa-regular fa-calendar text-3xl text-muted mb-3"></i>
+                            <p class="font-medium text-muted">No classes scheduled for today.</p>
+                        </div>`;
+                    return;
+                }
+
+                container.innerHTML = todaySlots.map(slot => {
+                    const subject = this.state.subjects.find(s => s.id === slot.subjectId);
+                    if(!subject) return '';
+                    
+                    const logs = this.state.logs[todayStr] || {};
+                    const currentStatus = logs[slot.id]; 
+
+                    const getBtnClass = (type) => {
+                        return currentStatus === type ? 'btn btn-outline active px-3 py-1.5' : 'btn btn-outline px-3 py-1.5 text-muted';
+                    };
+
+                    return `
+                        <div class="card p-4 border-line flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-surface">
+                            <div>
+                                <p class="font-serif font-bold text-lg">${subject.name}</p>
+                                <p class="text-xs uppercase tracking-widest text-muted mt-1">Weight: ${slot.weight} Class(es)</p>
+                            </div>
+                            <div class="flex space-x-2">
+                                <button onclick="app.logClass('${todayStr}', '${slot.id}', 'attended')" class="${getBtnClass('attended')}"><i class="fa-solid fa-check mr-1"></i>Attend</button>
+                                <button onclick="app.logClass('${todayStr}', '${slot.id}', 'bunked')" class="${getBtnClass('bunked')}"><i class="fa-solid fa-xmark mr-1"></i>Bunk</button>
+                                <button onclick="app.logClass('${todayStr}', '${slot.id}', 'cancelled')" class="${getBtnClass('cancelled')}"><i class="fa-solid fa-ban mr-1"></i>Cancel</button>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+            }
+
+            logClass(date, slotId, status) {
+                if (!this.state.logs[date]) this.state.logs[date] = {};
+                if (this.state.logs[date][slotId] === status) {
+                    delete this.state.logs[date][slotId];
+                } else {
+                    this.state.logs[date][slotId] = status;
+                }
+                this.saveData();
+            }
+
+            renderSchedule() {
+                // Render Subjects List
+                const subjContainer = document.getElementById('subjectListContainer');
+                if (subjContainer) {
+                    subjContainer.innerHTML = this.state.subjects.length === 0 ? 
+                        '<p class="text-sm text-muted italic col-span-full">No subjects added.</p>' : 
+                        this.state.subjects.map(sub => `
+                        <div class="card p-4 border-line flex items-center justify-between bg-surface">
+                            <div>
+                                <p class="font-bold font-serif text-lg">${sub.name}</p>
+                                <p class="text-[10px] text-muted uppercase tracking-wider mt-1">Target: ${sub.target || this.state.globalTarget}%</p>
+                            </div>
+                            <button onclick="app.deleteSubject('${sub.id}')" class="btn-ghost text-red-500 hover:text-red-600"><i class="fa-solid fa-trash"></i></button>
+                        </div>
+                    `).join('');
+                }
+
+                // Render Timetable Grid
+                const days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+                const gridContainer = document.getElementById('timetableGrid');
+                if (gridContainer) {
+                    gridContainer.innerHTML = days.map(day => {
+                        const daySlots = this.state.timetable.filter(t => t.day === day);
+                        const slotsHtml = daySlots.map(slot => {
+                            const sub = this.state.subjects.find(s => s.id === slot.subjectId);
+                            return sub ? `
+                                <span class="inline-block bg-bg-color border border-line text-xs px-2 py-1 rounded-lg mr-2 mb-2 flex items-center group shadow-sm">
+                                    <span class="font-medium">${sub.name}</span>
+                                    <span class="text-[9px] text-muted ml-1 font-mono">x${slot.weight}</span>
+                                    <i onclick="app.removeSlot('${slot.id}')" class="fa-solid fa-times ml-2 cursor-pointer text-muted hover:text-text-primary transition-colors"></i>
+                                </span>` : '';
+                        }).join('');
+                        
+                        return `
+                            <tr class="border-b border-line last:border-0">
+                                <td class="p-4 font-serif font-bold text-sm w-32">${day}</td>
+                                <td class="p-4">
+                                    <div class="flex flex-wrap items-center">
+                                        ${slotsHtml}
+                                        <button onclick="app.openAddSlotModal('${day}')" class="text-[10px] uppercase tracking-widest text-muted hover:text-text-primary border border-dashed border-line px-2 py-1 rounded-lg mb-2 transition-colors">
+                                            + Add
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                        `;
+                    }).join('');
+                }
+
+                // Render Exceptions List
+                const excContainer = document.getElementById('exceptionsListContainer');
+                if (excContainer) {
+                    const sortedDates = Object.keys(this.state.exceptions).sort((a,b) => new Date(b) - new Date(a));
+                    excContainer.innerHTML = sortedDates.length === 0 
+                        ? `<p class="text-sm text-muted italic">No exceptions logged.</p>`
+                        : sortedDates.map(date => {
+                            const ex = this.state.exceptions[date];
+                            return `
+                                <div class="card p-3 border-line flex items-center justify-between bg-surface">
+                                    <div>
+                                        <p class="text-sm font-bold font-serif">${new Date(date).toLocaleDateString('en-US', {month:'long', day:'numeric', year:'numeric'})}</p>
+                                        <p class="text-[10px] text-muted uppercase tracking-widest mt-1">${ex.type} ${ex.note ? '• ' + ex.note : ''}</p>
+                                    </div>
+                                    <button onclick="app.removeException('${date}')" class="btn-ghost text-red-500"><i class="fa-solid fa-trash"></i></button>
+                                </div>
+                            `;
+                        }).join('');
+                }
+            }
+
+            saveSubject() {
+                const name = document.getElementById('subjName').value.trim();
+                const target = document.getElementById('subjTarget').value;
+                if (!name) return this.showToast("Subject name is required.");
+
+                this.state.subjects.push({
+                    id: 'sub_' + Date.now(),
+                    name,
+                    target: target ? parseInt(target) : this.state.globalTarget
+                });
+
+                document.getElementById('subjName').value = '';
+                document.getElementById('subjTarget').value = '';
+                this.closeModal('subjectModal');
+                this.showToast("Subject added.");
+                this.saveData();
+            }
+
+            deleteSubject(id) {
+                this.state.subjects = this.state.subjects.filter(s => s.id !== id);
+                this.state.timetable = this.state.timetable.filter(t => t.subjectId !== id);
+                this.showToast("Subject deleted.");
+                this.saveData();
+            }
+
+            openAddSlotModal(day) {
+                if (this.state.subjects.length === 0) {
+                    return this.showToast('Please add a subject first before building timetable.');
+                }
+                this.pendingSlotDay = day;
+                document.getElementById('slotModalDay').textContent = day;
+                
+                const select = document.getElementById('slotSubject');
+                select.innerHTML = this.state.subjects.map(s => `<option value="${s.id}">${s.name}</option>`).join('');
+                
+                this.openModal('slotModal');
+            }
+
+            saveSlot() {
+                const subjectId = document.getElementById('slotSubject').value;
+                const weight = parseInt(document.getElementById('slotWeight').value) || 1;
+                
+                if (!subjectId || !this.pendingSlotDay) return;
+
+                this.state.timetable.push({
+                    id: 'slot_' + Date.now(),
+                    subjectId: subjectId,
+                    day: this.pendingSlotDay,
+                    weight: weight
+                });
+                
+                this.closeModal('slotModal');
+                this.pendingSlotDay = null;
+                this.showToast("Slot added to timetable.");
+                this.saveData();
+            }
+
+            removeSlot(id) {
+                this.state.timetable = this.state.timetable.filter(t => t.id !== id);
+                this.saveData();
+            }
+
+            saveException() {
+                const date = document.getElementById('exceptionDate').value;
+                const type = document.getElementById('exceptionType').value;
+                const note = document.getElementById('exceptionNote').value;
+                
+                if(!date) return this.showToast("Date is required.");
+                
+                this.state.exceptions[date] = { type, note };
+                this.closeModal('exceptionModal');
+                this.showToast("Exception saved.");
+                this.saveData();
+            }
+
+            removeException(date) {
+                delete this.state.exceptions[date];
+                this.showToast("Exception removed.");
+                this.saveData();
+            }
+
+            renderBaselinesForm() {
+                const container = document.getElementById('baselineList');
+                if(!container) return;
+
+                container.innerHTML = this.state.subjects.length === 0 ? 
+                    '<p class="text-sm text-muted">Add subjects in the Plan tab first.</p>' :
+                    this.state.subjects.map(sub => {
+                    const base = this.state.baselines[sub.id] || { attended: 0, held: 0 };
+                    return `
+                        <div class="card p-3 border-line bg-surface mb-2">
+                            <p class="font-bold font-serif text-sm mb-2">${sub.name}</p>
+                            <div class="flex space-x-2">
+                                <div>
+                                    <label class="text-[9px] uppercase tracking-widest text-muted">Attended</label>
+                                    <input type="number" id="base_att_${sub.id}" value="${base.attended}" class="input-field py-1 px-2 text-sm">
+                                </div>
+                                <div>
+                                    <label class="text-[9px] uppercase tracking-widest text-muted">Total Held</label>
+                                    <input type="number" id="base_held_${sub.id}" value="${base.held}" class="input-field py-1 px-2 text-sm">
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+            }
+
+            saveBaselines() {
+                this.state.subjects.forEach(sub => {
+                    const attEl = document.getElementById(`base_att_${sub.id}`);
+                    const heldEl = document.getElementById(`base_held_${sub.id}`);
+                    if (attEl && heldEl) {
+                        this.state.baselines[sub.id] = {
+                            attended: parseInt(attEl.value) || 0,
+                            held: parseInt(heldEl.value) || 0
+                        };
+                    }
+                });
+                this.closeModal('baselineModal');
+                this.showToast("Baselines updated.");
+                this.saveData();
+            }
+
+            handleSimulatorChange(subjectId, val) {
+                this.state.simulatorValues[subjectId] = parseInt(val);
+                this.renderGraph(); // Real-time UI update without saving to persistent storage
+            }
+
+            renderGraph() {
+                const container = document.getElementById('graphCardsContainer');
+                if (!container) return;
+
+                const labels = [];
+                const attData = [];
+                const bnkData = [];
+
+                let htmlContent = '';
+
+                this.state.subjects.forEach(sub => {
+                    // True Stats for Bar Chart
+                    const realStats = this.getStats(sub.id, 0);
+                    labels.push(sub.name);
+                    attData.push(realStats.attended);
+                    bnkData.push(realStats.held - realStats.attended);
+
+                    // Simulated Stats for Expandable Card UI
+                    const simVal = this.state.simulatorValues[sub.id] || 0;
+                    const stats = this.getStats(sub.id, simVal);
+
+                    let statusText = '';
+                    if (stats.classMargin > 0) statusText = `Safe Margin: ${stats.classMargin} classes available to bunk`;
+                    else if (stats.classMargin === 0) statusText = `On the edge (0 classes margin)`;
+                    else statusText = `Deficit: Must attend ${Math.abs(stats.classMargin)} consecutive classes`;
+
+                    htmlContent += `
+                        <div class="card border-line bg-surface">
+                            <div class="flex items-center justify-between cursor-pointer select-none" onclick="app.toggleExpand('exp_${sub.id}')">
+                                <div>
+                                    <h4 class="font-serif font-bold text-lg">${sub.name}</h4>
+                                    <p class="text-[10px] uppercase tracking-widest text-muted mt-1">${stats.attended} / ${stats.held} • ${stats.percentage}%</p>
+                                </div>
+                                <div class="text-right flex items-center">
+                                    <p class="font-medium text-[10px] tracking-widest uppercase mr-3 ${stats.classMargin < 0 ? 'text-text-primary font-bold' : 'text-muted'}">${stats.status}</p>
+                                    <i id="icon_exp_${sub.id}" class="fa-solid fa-chevron-down text-xs text-muted transition-transform duration-300"></i>
+                                </div>
+                            </div>
+                            
+                            <!-- What-If Simulator -->
+                            <div id="exp_${sub.id}" class="expandable">
+                                <div class="bg-bg-color p-4 rounded-xl border border-line shadow-sm mt-2">
+                                    <p class="text-[10px] uppercase tracking-widest text-muted mb-4 font-bold">What-If Projection Slider</p>
+                                    <input type="range" min="-10" max="10" value="${simVal}" 
+                                        oninput="app.handleSimulatorChange('${sub.id}', this.value)" 
+                                        class="w-full mb-4">
+                                    <div class="flex justify-between text-xs font-medium">
+                                        <span class="text-muted">Bunk 10</span>
+                                        <span class="text-text-primary bg-surface px-2 py-1 rounded-md text-[10px] uppercase tracking-wider">${simVal > 0 ? '+ Attend ' + simVal : (simVal < 0 ? 'Bunk ' + Math.abs(simVal) : 'Current Reality')}</span>
+                                        <span class="text-muted">Attend 10</span>
+                                    </div>
+                                    <div class="mt-4 pt-4 border-t border-line">
+                                        <p class="text-sm font-serif font-bold ${stats.classMargin < 0 ? 'underline underline-offset-4' : ''}">${statusText}</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                });
+
+                container.innerHTML = htmlContent;
+
+                // Render Classic Monochrome Chart.js
+                const canvas = document.getElementById('performanceChart');
+                if (!canvas) return;
+                
+                const ctx = canvas.getContext('2d');
+                if (this.chartInstance) this.chartInstance.destroy();
+
+                const isDark = document.body.classList.contains('dark');
+                const textColor = isDark ? '#93939A' : '#8A8A93';
+                const gridColor = isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.04)';
+                const barAttended = isDark ? '#FFFFFF' : '#0F0F13';
+                const barBunked = isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.06)';
+
+                this.chartInstance = new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: labels,
+                        datasets: [
+                            { label: 'Attended Classes', data: attData, backgroundColor: barAttended, borderRadius: 6, borderSkipped: false },
+                            { label: 'Bunked Classes', data: bnkData, backgroundColor: barBunked, borderRadius: 6, borderSkipped: false }
+                        ]
+                    },
+                    options: {
+                        responsive: true, maintainAspectRatio: false,
+                        plugins: {
+                            legend: { position: 'top', align: 'end', labels: { usePointStyle: true, boxWidth: 6, color: textColor, font: { family: 'Inter', size: 12, weight: '500' } } },
+                            tooltip: { backgroundColor: isDark ? '#1C1C1E' : '#FFFFFF', titleColor: isDark ? '#FFFFFF' : '#000000', bodyColor: isDark ? '#A1A1AA' : '#52525B', borderColor: gridColor, borderWidth: 1, padding: 12, boxPadding: 6, cornerRadius: 12, usePointStyle: true }
+                        },
+                        scales: {
+                            x: { grid: { display: false }, ticks: { color: textColor, font: { family: 'Inter', size: 11, weight: '500' } }, border: { display: false } },
+                            y: { grid: { color: gridColor, drawBorder: false }, ticks: { color: textColor, font: { family: 'Inter', size: 11 }, stepSize: 2 }, border: { display: false } }
+                        },
+                        interaction: { mode: 'index', intersect: false }
+                    }
+                });
+            }
+        }
+
+        const app = new LadderApp();
+        window.app = app; 
+        
+        document.addEventListener('DOMContentLoaded', () => {
+            app.init();
+        });
+    </script>
+</body>
+</html>

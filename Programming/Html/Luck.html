@@ -1,0 +1,633 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Luck Isn't Mystical, It's Mathematical</title>
+    <!-- Chosen Palette: Calm Harmony (Warm Neutrals with Soft Teal/Amber Accents) -->
+    <!-- Application Structure Plan: The SPA uses a thematic, single-page scrolling structure with a sticky top navigation for easy access to different sections. This design was chosen to guide the user through a narrative journey, starting from broad concepts and progressively diving into specific data and models. The flow is: 1) Introduction to the core thesis. 2) Defining Luck vs. Chance interactively. 3) A data-driven comparison of 'High-Stakes' vs. 'High-Probability' life outcomes via interactive charts, which is the core explorative section. 4) A visual, simplified simulation of the 'Talent vs. Luck' model to provide a 'wow-factor' and make a complex idea tangible. 5) An actionable section on how agency can 'create' luck. 6) A concluding summary. This non-linear but guided structure is more engaging and user-friendly for web consumption than the linear format of the source report. -->
+    <!-- Visualization & Content Choices: Report Info -> Goal -> Viz/Presentation Method -> Interaction -> Justification -> Library/Method. 1) Startup/Wealth Stats -> Compare -> Interactive Bar/Doughnut Charts -> User clicks buttons to toggle data views -> Allows direct comparison of vastly different probabilities, making abstract data concrete -> Chart.js. 2) Talent vs. Luck Model -> Demonstrate a complex relationship -> Custom HTML/CSS/JS Animation -> User clicks 'Run' to see a visual simulation of agents rising with talent and random 'luck boosts' -> More impactful and memorable than text, proving the counter-intuitive point that the luckiest, not always the most talented, reach the top -> Vanilla JS + Tailwind. 3) Defining Luck/Chance/Agency -> Inform/Organize -> Styled HTML Cards & Simple Charts -> Hover effects and toggles -> Breaks down complex definitions into digestible, interactive chunks without overwhelming the user -> HTML/CSS/JS. -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #fdfcfb;
+            color: #374151;
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 320px;
+            max-height: 400px;
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 400px;
+            }
+        }
+        .nav-link {
+            transition: color 0.3s, border-color 0.3s;
+        }
+        .nav-link:hover, .nav-link.active {
+            color: #c2410c;
+            border-bottom-color: #c2410c;
+        }
+        .talent-grid-container {
+            display: grid;
+            grid-template-columns: repeat(10, 1fr);
+            gap: 8px;
+            height: 400px;
+            padding: 10px;
+            background: #f8fafc;
+            border-radius: 0.5rem;
+            border: 1px solid #e2e8f0;
+            overflow: hidden;
+            position: relative;
+        }
+        .talent-agent {
+            width: 100%;
+            padding-bottom: 100%;
+            border-radius: 50%;
+            background-color: #94a3b8;
+            transition: transform 1s ease-out, background-color 0.5s;
+            position: relative;
+            bottom: 0;
+            transform: translateY(0);
+        }
+    </style>
+</head>
+<body class="antialiased">
+
+    <header id="header" class="bg-fdfcfb/80 backdrop-blur-sm sticky top-0 z-50 shadow-sm">
+        <nav class="container mx-auto px-6 py-3 flex justify-between items-center">
+            <h1 class="text-xl font-bold text-slate-800">Luck is Mathematical</h1>
+            <div class="hidden md:flex items-center space-x-8">
+                <a href="#deconstructing" class="nav-link text-slate-600 font-medium pb-1 border-b-2 border-transparent">Defining Luck</a>
+                <a href="#spectrum" class="nav-link text-slate-600 font-medium pb-1 border-b-2 border-transparent">The Spectrum</a>
+                <a href="#simulation" class="nav-link text-slate-600 font-medium pb-1 border-b-2 border-transparent">Simulation</a>
+                <a href="#agency" class="nav-link text-slate-600 font-medium pb-1 border-b-2 border-transparent">Your Role</a>
+            </div>
+        </nav>
+    </header>
+
+    <main>
+        <section id="hero" class="py-20 md:py-32 text-center bg-amber-50">
+            <div class="container mx-auto px-6">
+                <h2 class="text-4xl md:text-6xl font-bold text-slate-900 tracking-tight">Luck Isn't Mystical.</h2>
+                <h3 class="text-4xl md:text-6xl font-bold text-orange-800 tracking-tight mt-2">It's a Problem of Probability.</h3>
+                <p class="mt-6 max-w-3xl mx-auto text-lg text-slate-700">Explore the statistical reality behind success and failure. This interactive report deconstructs luck, revealing how probability, talent, and effort combine to shape our lives in predictable ways.</p>
+            </div>
+        </section>
+
+        <section id="deconstructing" class="py-16 md:py-24">
+            <div class="container mx-auto px-6">
+                <div class="text-center max-w-3xl mx-auto">
+                    <h2 class="text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl">Deconstructing Luck</h2>
+                    <p class="mt-4 text-lg text-slate-600">
+                        To understand luck mathematically, we must first separate it from pure chance. This section breaks down the core components of luck, moving beyond mysticism to a clear, rational definition based on probability and significance.
+                    </p>
+                </div>
+                <div class="mt-12 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                    <div class="bg-white p-6 rounded-lg border border-slate-200">
+                        <h3 class="font-bold text-xl text-slate-800">🎲 Chance</h3>
+                        <p class="mt-2 text-slate-600">The raw, objective probability of an event happening. It is universal and external, like a coin flip. It occurs without any personal input or skill.</p>
+                    </div>
+                    <div class="bg-white p-6 rounded-lg border-2 border-orange-600 shadow-lg">
+                        <h3 class="font-bold text-xl text-slate-800">🍀 Luck</h3>
+                        <p class="mt-2 text-slate-600">Chance that is personally significant to you (good or bad). It's where probability meets personal impact. Unlike pure chance, it often involves your effort and intent.</p>
+                    </div>
+                    <div class="bg-white p-6 rounded-lg border border-slate-200">
+                        <h3 class="font-bold text-xl text-slate-800">🏆 Significance</h3>
+                        <p class="mt-2 text-slate-600">The key ingredient that turns chance into luck. An event is only "lucky" or "unlucky" if it has a meaningful positive or negative consequence for you.</p>
+                    </div>
+                </div>
+                <div class="mt-12 bg-teal-50 text-teal-800 p-8 rounded-lg text-center">
+                    <p class="text-2xl font-semibold">The Core Equation: <span class="font-bold">Luck = Improbability + Significance</span></p>
+                    <p class="mt-2">An event is perceived as "lucky" when it is both highly unlikely and has a major impact on your life. The rarer the event and the higher the stakes, the "luckier" it seems.</p>
+                </div>
+
+                <div class="mt-16 pt-8 border-t border-slate-200">
+                    <h3 class="text-2xl font-bold text-center text-slate-800 mb-4">✨ Analyze My Event</h3>
+                    <p class="text-center text-slate-600 max-w-2xl mx-auto mb-6">
+                        Describe an event you experienced, and I'll analyze whether it fits the mathematical definition of "luck" based on its improbability and significance.
+                    </p>
+                    <div class="max-w-xl mx-auto">
+                        <textarea id="eventInput" rows="3" class="w-full p-3 border border-slate-300 rounded-lg focus:ring-orange-500 focus:border-orange-500" placeholder="e.g., 'I found a rare coin on the street.' or 'My flight was delayed, and I missed an important meeting.'"></textarea>
+                        <button id="analyzeEventBtn" class="mt-4 w-full px-6 py-3 font-bold text-white bg-orange-600 rounded-lg hover:bg-orange-700 transition-colors">Analyze Event</button>
+                        <div id="eventAnalysisOutput" class="mt-6 p-4 bg-slate-100 rounded-lg border border-slate-200 text-slate-700 hidden">
+                            <p id="eventAnalysisText"></p>
+                            <div id="eventAnalysisLoading" class="hidden text-center">
+                                <div class="animate-spin inline-block w-6 h-6 border-4 border-orange-500 border-t-transparent rounded-full"></div>
+                                <p class="mt-2 text-sm">Analyzing...</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <hr class="border-slate-200 container mx-auto">
+
+        <section id="spectrum" class="py-16 md:py-24 bg-slate-50">
+            <div class="container mx-auto px-6">
+                <div class="text-center max-w-3xl mx-auto">
+                    <h2 class="text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl">The Spectrum of Success</h2>
+                    <p class="mt-4 text-lg text-slate-600">
+                        Not all ambitions are created equal from a probabilistic standpoint. Here, we compare the statistical realities of "High-Stakes" paths, which are defined by extremely low probabilities of success, against "High-Probability" paths, which offer more predictable outcomes. Use the buttons to explore the data and see how the math of luck applies to different career and life goals.
+                    </p>
+                </div>
+                <div class="mt-12 text-center">
+                    <div class="inline-flex rounded-md shadow-sm" role="group">
+                        <button type="button" id="highStakesBtn" class="px-6 py-3 text-sm font-medium text-white bg-orange-700 border border-orange-700 rounded-l-lg hover:bg-orange-800 focus:z-10 focus:ring-2 focus:ring-orange-500">
+                            High-Stakes Gambles
+                        </button>
+                        <button type="button" id="highProbBtn" class="px-6 py-3 text-sm font-medium text-slate-900 bg-white border-t border-b border-slate-200 hover:bg-slate-100 focus:z-10 focus:ring-2 focus:ring-orange-500">
+                            High-Probability Paths
+                        </button>
+                    </div>
+                </div>
+                <div class="mt-8">
+                    <h3 id="chartTitle" class="text-2xl font-bold text-center text-slate-800 mb-2"></h3>
+                    <p id="chartSubtitle" class="text-center text-slate-600 max-w-2xl mx-auto mb-8"></p>
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+                        <div class="chart-container">
+                            <canvas id="barChart"></canvas>
+                        </div>
+                        <div class="chart-container">
+                            <canvas id="doughnutChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <hr class="border-slate-200 container mx-auto">
+
+        <section id="simulation" class="py-16 md:py-24">
+            <div class="container mx-auto px-6">
+                <div class="text-center max-w-3xl mx-auto">
+                    <h2 class="text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl">The Talent vs. Luck Simulation</h2>
+                    <p class="mt-4 text-lg text-slate-600">
+                        Does the most talented person always win? The "Talent vs. Luck" (TvL) model suggests otherwise. This simplified simulation demonstrates the powerful role of random lucky events. Each circle represents an individual, with their brightness indicating talent level. Watch how "lucky breaks" can catapult moderately talented individuals to the top, often outpacing their more gifted but less lucky peers.
+                    </p>
+                </div>
+                <div class="mt-12 max-w-4xl mx-auto">
+                    <div class="talent-grid-container" id="talentGrid"></div>
+                    <div class="mt-8 text-center">
+                        <button id="runSimBtn" class="px-8 py-3 font-bold text-white bg-teal-600 rounded-lg hover:bg-teal-700 transition-colors">Run Simulation</button>
+                    </div>
+                    <div class="mt-6 text-center text-sm text-slate-500">
+                        <p><span class="font-bold">Key:</span> Brighter circles represent higher talent. A <span class="font-bold text-amber-500">golden flash</span> indicates a lucky event.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <hr class="border-slate-200 container mx-auto">
+
+        <section id="agency" class="py-16 md:py-24 bg-amber-50">
+            <div class="container mx-auto px-6">
+                <div class="text-center max-w-3xl mx-auto">
+                    <h2 class="text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl">Tipping the Scales: Your Role in Luck</h2>
+                    <p class="mt-4 text-lg text-slate-600">
+                       While you can't control chance, you can influence your probability of success. Louis Pasteur said, "Chance favors the prepared mind." This section explores how agency—your skills, effort, and strategies—can increase your "luck surface area," making you better prepared to capitalize on opportunities when they arise.
+                    </p>
+                </div>
+                <div class="mt-12 grid grid-cols-1 md:grid-cols-2 gap-8 items-start">
+                     <div class="bg-white p-6 rounded-lg border border-slate-200">
+                        <h3 class="font-bold text-xl text-slate-800 mb-4">The 85/15 Rule of Career Success</h3>
+                        <p class="text-slate-600 mb-4">Research shows that professional success is disproportionately driven by soft skills over technical knowledge.</p>
+                        <div class="chart-container" style="height: 250px; max-height:300px;">
+                            <canvas id="skillsChart"></canvas>
+                        </div>
+                    </div>
+                    <div class="bg-white p-6 rounded-lg border border-slate-200">
+                        <h3 class="font-bold text-xl text-slate-800 mb-4">Strategy: Increase Your Trials</h3>
+                        <p class="text-slate-600 mb-4">For any low-probability event, increasing your attempts is a rational strategy to improve your chances of at least one success. How many "shots" would you need to take to have a >90% chance of success for an event with a 10% probability?</p>
+                        <div class="space-y-4">
+                            <input type="range" id="trialSlider" min="1" max="40" value="10" class="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer">
+                            <div class="text-center">
+                                <p class="text-lg">With <span id="trialCount" class="font-bold text-2xl text-orange-700">10</span> shots at a <span class="font-bold">10%</span> chance event:</p>
+                                <p class="mt-2 text-xl">Your probability of at least one success is <span id="trialResult" class="font-bold text-3xl text-teal-600">65.1%</span></p>
+                            </div>
+                        </div>
+                         <p class="mt-6 text-xs text-center text-slate-500">This illustrates how persistence (more trials) directly improves your odds, a key strategy used by successful entrepreneurs who "pivot" or try again after failure.</p>
+                    </div>
+                </div>
+
+                <div class="mt-16 pt-8 border-t border-slate-200">
+                    <h3 class="text-2xl font-bold text-center text-slate-800 mb-4">✨ Generate Luck Strategies</h3>
+                    <p class="text-center text-slate-600 max-w-2xl mx-auto mb-6">
+                        Describe a personal goal or challenge you're facing, and I'll suggest strategies to increase your "luck surface area" for that specific outcome.
+                    </p>
+                    <div class="max-w-xl mx-auto">
+                        <textarea id="goalInput" rows="4" class="w-full p-3 border border-slate-300 rounded-lg focus:ring-teal-500 focus:border-teal-500" placeholder="e.g., 'I want to find a new job in tech.' or 'I'm trying to launch my own small business.'"></textarea>
+                        <button id="generateStrategiesBtn" class="mt-4 w-full px-6 py-3 font-bold text-white bg-teal-600 rounded-lg hover:bg-teal-700 transition-colors">Generate Strategies</button>
+                        <div id="strategyOutput" class="mt-6 p-4 bg-slate-100 rounded-lg border border-slate-200 text-slate-700 hidden">
+                            <p id="strategyText"></p>
+                            <div id="strategyLoading" class="hidden text-center">
+                                <div class="animate-spin inline-block w-6 h-6 border-4 border-teal-500 border-t-transparent rounded-full"></div>
+                                <p class="mt-2 text-sm">Generating...</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <footer class="bg-slate-800 text-slate-400 py-12">
+        <div class="container mx-auto px-6 text-center">
+            <h3 class="text-2xl font-bold text-white mb-2">Conclusion: Embrace a Rational View of Luck</h3>
+            <p class="max-w-3xl mx-auto">
+                Luck is not a mysterious force but a measurable aspect of our probabilistic world. By understanding the math, we can move from passive hope to active strategy. We can work with the odds, develop the right skills, and strategically increase our trials to improve our chances of success. This rational view fosters humility in our victories and resilience in our failures, empowering us to navigate life with a clearer, more logical perspective.
+            </p>
+            <p class="mt-8 text-sm">Interactive report based on the paper "Luck isn't mystical it's mathematical."</p>
+        </div>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            
+            const highStakesData = {
+                bar: {
+                    labels: ['Unicorn Startup', 'US Billionaire', 'First-Time Founder'],
+                    datasets: [{
+                        label: 'Success Rate (%)',
+                        data: [0.0001, 0.00017, 18],
+                        backgroundColor: ['#dd6b20', '#c05621', '#9c4221'],
+                    }]
+                },
+                doughnut: {
+                    labels: ['Failure', 'Success'],
+                    datasets: [{
+                        data: [90, 10],
+                        backgroundColor: ['#cbd5e1', '#dd6b20'],
+                        borderColor: '#fdfcfb',
+                        borderWidth: 4,
+                    }]
+                },
+                title: "High-Stakes Gambles",
+                subtitle: "These paths are characterized by extremely low probabilities of success. Achieving them often requires overcoming astronomical odds, making 'luck' a statistically significant factor."
+            };
+
+            const highProbData = {
+                bar: {
+                    labels: ['Job Success from Soft Skills', 'Self-Made Millionaires', 'Small Business (Survives 5 Yrs)'],
+                    datasets: [{
+                        label: 'Success Rate (%)',
+                        data: [85, 86, 50],
+                        backgroundColor: ['#319795', '#2c7a7b', '#285e61'],
+                    }]
+                },
+                doughnut: {
+                    labels: ['Fail within 5 years', 'Succeed'],
+                    datasets: [{
+                        data: [50, 50],
+                        backgroundColor: ['#cbd5e1', '#319795'],
+                        borderColor: '#fdfcfb',
+                        borderWidth: 4,
+                    }]
+                },
+                title: "High-Probability Paths",
+                subtitle: "These outcomes rely more on consistent effort, specific skills, and navigating less extreme probabilities. While luck still plays a role, the baseline chance of success is significantly higher."
+            };
+            
+            let barChart, doughnutChart;
+
+            const ctxBar = document.getElementById('barChart').getContext('2d');
+            const ctxDoughnut = document.getElementById('doughnutChart').getContext('2d');
+            const chartTitleEl = document.getElementById('chartTitle');
+            const chartSubtitleEl = document.getElementById('chartSubtitle');
+
+            function createCharts(barData, doughnutData) {
+                if(barChart) barChart.destroy();
+                if(doughnutChart) doughnutChart.destroy();
+                
+                barChart = new Chart(ctxBar, {
+                    type: 'bar',
+                    data: barData,
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: { display: false },
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        let label = context.dataset.label || '';
+                                        if (label) { label += ': '; }
+                                        let value = context.parsed.y;
+                                        return label + (value < 0.1 ? value.toFixed(5) : value.toFixed(2)) + '%';
+                                    }
+                                }
+                            }
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                title: { display: true, text: 'Probability of Success (%)' }
+                            },
+                             x: {
+                                ticks: {
+                                    autoSkip: false,
+                                    maxRotation: 0,
+                                    minRotation: 0,
+                                    callback: function(value, index, values) {
+                                        const label = this.getLabelForValue(value);
+                                        if (label.length > 16) {
+                                            return label.match(/.{1,16}/g);
+                                        }
+                                        return label;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                });
+
+                doughnutChart = new Chart(ctxDoughnut, {
+                    type: 'doughnut',
+                    data: doughnutData,
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: { position: 'top' },
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        return `${context.label}: ${context.parsed}%`;
+                                    }
+                                }
+                            }
+                        },
+                        cutout: '60%'
+                    }
+                });
+            }
+
+            function updateChartSection(data) {
+                chartTitleEl.textContent = data.title;
+                chartSubtitleEl.textContent = data.subtitle;
+                createCharts(data.bar, data.doughnut);
+            }
+
+            const highStakesBtn = document.getElementById('highStakesBtn');
+            const highProbBtn = document.getElementById('highProbBtn');
+            
+            highStakesBtn.addEventListener('click', () => {
+                updateChartSection(highStakesData);
+                highStakesBtn.classList.add('bg-orange-700', 'text-white');
+                highStakesBtn.classList.remove('bg-white', 'text-slate-900');
+                highProbBtn.classList.add('bg-white', 'text-slate-900');
+                highProbBtn.classList.remove('bg-teal-600', 'text-white');
+
+            });
+            highProbBtn.addEventListener('click', () => {
+                updateChartSection(highProbData);
+                highProbBtn.classList.add('bg-teal-600', 'text-white');
+                highProbBtn.classList.remove('bg-white', 'text-slate-900');
+                highStakesBtn.classList.add('bg-white', 'text-slate-900');
+                highStakesBtn.classList.remove('bg-orange-700', 'text-white');
+            });
+            
+            updateChartSection(highStakesData);
+
+            const talentGrid = document.getElementById('talentGrid');
+            const runSimBtn = document.getElementById('runSimBtn');
+            const numAgents = 100;
+            let agents = [];
+
+            function setupSimulation() {
+                talentGrid.innerHTML = '';
+                agents = [];
+                for (let i = 0; i < numAgents; i++) {
+                    const agentEl = document.createElement('div');
+                    agentEl.classList.add('talent-agent');
+                    const talent = Math.random();
+                    const agent = {
+                        el: agentEl,
+                        talent: talent,
+                        success: 0,
+                    };
+                    agent.el.style.opacity = 0.4 + talent * 0.6;
+                    talentGrid.appendChild(agentEl);
+                    agents.push(agent);
+                }
+            }
+
+            runSimBtn.addEventListener('click', () => {
+                runSimBtn.disabled = true;
+                runSimBtn.textContent = 'Simulating...';
+                setupSimulation();
+
+                let intervalCount = 0;
+                const maxIntervals = 40;
+
+                const intervalId = setInterval(() => {
+                    agents.forEach(agent => {
+                        agent.success += agent.talent * 0.1;
+
+                        if (Math.random() < 0.05) { 
+                            agent.success += 5; 
+                            agent.el.style.backgroundColor = '#f59e0b';
+                            setTimeout(() => {
+                                agent.el.style.backgroundColor = '';
+                            }, 500);
+                        }
+                        
+                        const translateY = Math.min(100, agent.success) * -3.5;
+                        agent.el.style.transform = `translateY(${translateY}px)`;
+                    });
+
+                    intervalCount++;
+                    if (intervalCount >= maxIntervals) {
+                        clearInterval(intervalId);
+                        runSimBtn.disabled = false;
+                        runSimBtn.textContent = 'Run Simulation Again';
+                    }
+                }, 100);
+            });
+
+            setupSimulation();
+            
+            const ctxSkills = document.getElementById('skillsChart').getContext('2d');
+            new Chart(ctxSkills, {
+                type: 'pie',
+                data: {
+                    labels: ['Soft Skills (85%)', 'Technical Skills (15%)'],
+                    datasets: [{
+                        data: [85, 15],
+                        backgroundColor: ['#2c7a7b', '#a3a3a3'],
+                        borderColor: '#fdfcfb',
+                        borderWidth: 4,
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                     plugins: { legend: { position: 'top' } }
+                }
+            });
+
+            const trialSlider = document.getElementById('trialSlider');
+            const trialCount = document.getElementById('trialCount');
+            const trialResult = document.getElementById('trialResult');
+            trialSlider.addEventListener('input', (event) => {
+                const shots = parseInt(event.target.value);
+                const probFailure = 0.9;
+                const probAllFail = Math.pow(probFailure, shots);
+                const probAtLeastOneSuccess = 1 - probAllFail;
+                
+                trialCount.textContent = shots;
+                trialResult.textContent = (probAtLeastOneSuccess * 100).toFixed(1) + '%';
+            });
+
+            const sections = document.querySelectorAll('main section');
+            const navLinks = document.querySelectorAll('.nav-link');
+            const header = document.getElementById('header');
+            
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        navLinks.forEach(link => {
+                            link.classList.toggle('active', link.getAttribute('href').substring(1) === entry.target.id);
+                        });
+                    }
+                });
+            }, { rootMargin: `-${header.offsetHeight}px 0px 0px 0px`, threshold: 0.4 });
+            
+            sections.forEach(section => observer.observe(section));
+
+            // Gemini API Integration - Analyze My Event
+            const eventInput = document.getElementById('eventInput');
+            const analyzeEventBtn = document.getElementById('analyzeEventBtn');
+            const eventAnalysisOutput = document.getElementById('eventAnalysisOutput');
+            const eventAnalysisText = document.getElementById('eventAnalysisText');
+            const eventAnalysisLoading = document.getElementById('eventAnalysisLoading');
+
+            analyzeEventBtn.addEventListener('click', async () => {
+                const eventDescription = eventInput.value.trim();
+                if (!eventDescription) {
+                    eventAnalysisOutput.classList.remove('hidden');
+                    eventAnalysisText.textContent = "Please describe an event to analyze.";
+                    return;
+                }
+
+                eventAnalysisOutput.classList.remove('hidden');
+                eventAnalysisText.textContent = '';
+                eventAnalysisLoading.classList.remove('hidden');
+                analyzeEventBtn.disabled = true;
+
+                try {
+                    const prompt = `Based on the definitions: 
+                    - Chance: Raw, objective probability of an event. External, no personal input.
+                    - Luck: Chance that is personally significant (good or bad). Involves personal impact, often effort/intent.
+                    - Significance: Meaningful positive or negative consequence.
+                    
+                    Analyze the following event and explain if it qualifies as "luck" and why, considering its improbability and significance. Be concise and direct, focusing on the mathematical/probabilistic aspect.
+                    
+                    Event: "${eventDescription}"`;
+
+                    let chatHistory = [];
+                    chatHistory.push({ role: "user", parts: [{ text: prompt }] });
+                    const payload = { contents: chatHistory };
+                    const apiKey = "";
+                    const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
+
+                    const response = await fetch(apiUrl, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    });
+                    const result = await response.json();
+
+                    if (result.candidates && result.candidates.length > 0 &&
+                        result.candidates[0].content && result.candidates[0].content.parts &&
+                        result.candidates[0].content.parts.length > 0) {
+                        const text = result.candidates[0].content.parts[0].text;
+                        eventAnalysisText.textContent = text;
+                    } else {
+                        eventAnalysisText.textContent = "Could not get an analysis. Please try again.";
+                    }
+                } catch (error) {
+                    console.error("Error analyzing event:", error);
+                    eventAnalysisText.textContent = "An error occurred during analysis. Please try again.";
+                } finally {
+                    eventAnalysisLoading.classList.add('hidden');
+                    analyzeEventBtn.disabled = false;
+                }
+            });
+
+            // Gemini API Integration - Generate Luck Strategies
+            const goalInput = document.getElementById('goalInput');
+            const generateStrategiesBtn = document.getElementById('generateStrategiesBtn');
+            const strategyOutput = document.getElementById('strategyOutput');
+            const strategyText = document.getElementById('strategyText');
+            const strategyLoading = document.getElementById('strategyLoading');
+
+            generateStrategiesBtn.addEventListener('click', async () => {
+                const goalDescription = goalInput.value.trim();
+                if (!goalDescription) {
+                    strategyOutput.classList.remove('hidden');
+                    strategyText.textContent = "Please describe your goal to get strategies.";
+                    return;
+                }
+
+                strategyOutput.classList.remove('hidden');
+                strategyText.textContent = '';
+                strategyLoading.classList.remove('hidden');
+                generateStrategiesBtn.disabled = true;
+
+                try {
+                    const prompt = `You are an expert on increasing "luck surface area" through agency. Given the goal: "${goalDescription}", suggest 3-5 actionable strategies focused on increasing probability of success by:
+                    1.  **Persistence/More Trials:** How to make more attempts or "shots."
+                    2.  **Networking/Exposure:** How to connect with more people or opportunities.
+                    3.  **Skill Development/Preparation:** How to be better prepared for opportunities.
+                    4.  **Adaptability/Openness:** How to recognize and seize unexpected opportunities.
+                    
+                    Format your response as a bulleted list of concise, actionable advice.`;
+
+                    let chatHistory = [];
+                    chatHistory.push({ role: "user", parts: [{ text: prompt }] });
+                    const payload = { contents: chatHistory };
+                    const apiKey = "";
+                    const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
+
+                    const response = await fetch(apiUrl, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    });
+                    const result = await response.json();
+
+                    if (result.candidates && result.candidates.length > 0 &&
+                        result.candidates[0].content && result.candidates[0].content.parts &&
+                        result.candidates[0].content.parts.length > 0) {
+                        const text = result.candidates[0].content.parts[0].text;
+                        strategyText.textContent = text;
+                    } else {
+                        strategyText.textContent = "Could not generate strategies. Please try again.";
+                    }
+                } catch (error) {
+                    console.error("Error generating strategies:", error);
+                    strategyText.textContent = "An error occurred during strategy generation. Please try again.";
+                } finally {
+                    strategyLoading.classList.add('hidden');
+                    generateStrategiesBtn.disabled = false;
+                }
+            });
+        });
+    </script>
+</body>
+</html>

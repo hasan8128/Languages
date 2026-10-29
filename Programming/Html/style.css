@@ -1,0 +1,8 @@
+.main{font-size: 18px; font-weight: italic; margin-top: 60px ;}
+            .box{background: rgb(135, 118, 118);font-size: 18px; font-weight: italic; text-align: center; margin-top: 60px ; margin-left: 200px; margin-right: 100px;
+            border: 10px;}
+            body{background: silver;}
+            h1{color: black; text-align: center;}
+            h2{color: rgb(45, 85, 103)  ; margin-left: 250px; text-align: left; margin-top: 80px; }
+            p{font-size: 30px; background: grey;}
+            
